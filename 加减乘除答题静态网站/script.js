@@ -55,19 +55,29 @@ function generateQuestion() {
             currentAnswer = num1 - num2;
             break;
         case '*':
-            num1 = pseudoRandom(max + 1); // 生成 0 到 max 的整数
-            num2 = pseudoRandom(max + 1); // 生成 0 到 max 的整数
-            currentAnswer = num1 * num2;
+            // 确保乘法的答案在指定范围内
+            const sqrtMax = Math.floor(Math.sqrt(max)); // 计算 sqrt(max) 并取整
+            do {
+                num1 = pseudoRandom(sqrtMax + 1); // 生成的数不超过 sqrt(max)
+                num2 = pseudoRandom(sqrtMax + 1); // 生成的数不超过 sqrt(max)
+                currentAnswer = num1 * num2;
+            } while (currentAnswer > max);
             break;
         case '/':
-            num2 = pseudoRandom(max - 1) + 1; // 避免除以0
-            currentAnswer = pseudoRandom(max + 1);
-            num1 = currentAnswer * num2;
+            // 确保被除数大于除数，且被除数不超过指定的最大值，并且能整除
+            do {
+                num1 = pseudoRandom(max + 1); // 确保被除数是整数
+                num2 = pseudoRandom(max - 1) + 1; // 避免除以0
+                currentAnswer = num1 / num2
+            } while (num1 > max || num1 <= num2 || num1 % num2 != 0);
             break;
     }
 
     const question = `${num1} ${operation} ${num2}`;
     document.getElementById('question').innerText = `题目: ${question}`;
+
+    // 更新统计信息，包括正确率
+    updateStats();
 }
 
 function submitAnswer() {
@@ -119,7 +129,6 @@ function updateStats() {
 }
 
 function pseudoRandom(max) {
-    // 使用当前时间戳和一个简单的算法生成伪随机数
-    const seed = Date.now() % 1000; // 取当前时间的毫秒部分作为种子
-    return (seed % max);
+    // 使用 Math.random() 生成伪随机数
+    return Math.floor(Math.random() * max);
 } 
