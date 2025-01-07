@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>计算题</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        h1 {
+            color: #4a90e2;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        label, input, select, button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+        }
+        input, select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4a90e2;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #357ab8;
+        }
+        .result {
+            margin-top: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 设定界面 -->
+        <div id="setup">
+            <h1>设定运算</h1>
+            <label for="maxValue">设定多少以内的运算?:</label>
+            <input type="number" id="maxValue" min="1" value="10">
+            <label for="operation">选择运算类型:</label>
+            <select id="operation">
+                <option value="+">加法</option>
+                <option value="-">减法</option>
+                <option value="*">乘法</option>
+                <option value="/">除法</option>
+            </select>
+            <label for="maxAttempts">提交答案错误后的机会次数:</label>
+            <input type="number" id="maxAttempts" min="1" value="3">
+            <button onclick="startQuiz()">开始</button>
+        </div>
+
+        <!-- 题目界面 -->
+        <div id="quiz" class="hidden">
+            <h1>计算题</h1>
+            <div id="question" class="result"></div>
+            <input type="number" id="answer" placeholder="写出答案">
+            <button onclick="submitAnswer()">提交答案</button>
+            <button onclick="resetQuiz()">返回</button>
+            <div id="error-message" style="color: red;"></div>
+            <div id="correct-answer" style="color: red; display: none;">正确答案是: <span id="correct-answer-value"></span></div>
+            <div id="stats" class="result">
+                <p>总题数: <span id="total">0</span></p>
+                <p>正确数: <span id="correct">0</span></p>
+                <p>正确率: <span id="accuracy">0</span>%</p>
+                <p id="attempts">剩余机会: 0</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
