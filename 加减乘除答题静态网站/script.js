@@ -82,42 +82,48 @@ function generateQuestion() {
 
 function submitAnswer() {
     const userAnswer = parseFloat(document.getElementById('answer').value);
+    const submitButton = document.querySelector('button[onclick="submitAnswer()"]');
+    submitButton.disabled = true; // 禁用提交按钮
 
     if (userAnswer === currentAnswer) {
         correctAnswers++;
-        totalQuestions++; // 只有在回答正确时才增加总题数
-        remainingAttempts = 0; // 答对了，重置机会
-        document.getElementById('answer').value = ''; // 清空输入框
-        document.getElementById('attempts').innerText = `剩余机会: ${remainingAttempts}`; // 更新剩余机会显示
-        document.getElementById('error-message').innerText = '答对了！'; // 显示答对了消息
-        document.getElementById('correct-answer').style.display = 'none'; // 隐藏正确答案
+        totalQuestions++;
+        remainingAttempts = 0;
+        document.getElementById('answer').value = '';
+        document.getElementById('attempts').innerText = `剩余机会: ${remainingAttempts}`;
+        document.getElementById('error-message').innerText = '答对了！';
+        document.getElementById('correct-answer').style.display = 'none';
 
         setTimeout(() => {
-            document.getElementById('error-message').innerText = ''; // 清空答对了消息
-            generateQuestion(); // 继续生成新题目
-        }, 500); // 停留 0.5 秒后继续
+            document.getElementById('error-message').innerText = '';
+            generateQuestion();
+            submitButton.disabled = false; // 重新启用提交按钮
+        }, 500);
     } else {
-        remainingAttempts--; // 答错了，减少机会
-        document.getElementById('error-message').innerText = '答错了！'; // 显示错误消息
-        document.getElementById('attempts').innerText = `剩余机会: ${remainingAttempts}`; // 更新剩余机会显示
+        remainingAttempts--;
+        document.getElementById('error-message').innerText = '答错了！';
+        document.getElementById('attempts').innerText = `剩余机会: ${remainingAttempts}`;
 
         if (remainingAttempts < 0) {
-            document.getElementById('attempts').innerText = `剩余机会: 0`; // 显示机会用完
-            document.getElementById('correct-answer-value').innerText = currentAnswer; // 设置正确答案
-            document.getElementById('correct-answer').style.display = 'block'; // 显示正确答案
+            document.getElementById('attempts').innerText = `剩余机会: 0`;
+            document.getElementById('correct-answer-value').innerText = currentAnswer;
+            document.getElementById('correct-answer').style.display = 'block';
             setTimeout(() => {
-                document.getElementById('error-message').innerText = ''; // 清空错误消息
-                remainingAttempts = parseInt(document.getElementById('maxAttempts').value); // 重置机会
-                generateQuestion(); // 生成新题目
-                document.getElementById('correct-answer').style.display = 'none'; // 隐藏正确答案
-                totalQuestions++; // 在生成新题目时增加总题数
-                updateStats(); // 更新统计信息
-            }, 2000); // 延迟 2 秒后显示正确答案
+                document.getElementById('error-message').innerText = '';
+                remainingAttempts = parseInt(document.getElementById('maxAttempts').value);
+                generateQuestion();
+                document.getElementById('correct-answer').style.display = 'none';
+                totalQuestions++;
+                updateStats();
+                submitButton.disabled = false; // 重新启用提交按钮
+            }, 2000);
+        } else {
+            submitButton.disabled = false; // 如果还有机会，立即重新启用提交按钮
         }
     }
 
-    updateStats(); // 更新统计信息
-    document.getElementById('answer').value = ''; // 清空输入框
+    updateStats();
+    document.getElementById('answer').value = '';
 }
 
 function updateStats() {
