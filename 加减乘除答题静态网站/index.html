@@ -77,6 +77,12 @@
             </select>
             <label for="maxAttempts">提交答案错误后的机会次数:</label>
             <input type="number" id="maxAttempts" min="1" value="3">
+            <label for="enableTimer">是否启用计时:</label>
+            <input type="checkbox" id="enableTimer" onchange="toggleTimerInput()">
+            <div id="timerSettings" style="display: none;">
+                <label for="timerSeconds">倒计时秒数:</label>
+                <input type="number" id="timerSeconds" min="1" value="30">
+            </div>
             <button onclick="startQuiz()">开始</button>
         </div>
 
@@ -95,6 +101,7 @@
                 <p>正确率: <span id="accuracy">0</span>%</p>
                 <p id="attempts">剩余机会: 0</p>
             </div>
+            <div id="timer" class="result" style="color: red;"></div>
         </div>
     </div>
 

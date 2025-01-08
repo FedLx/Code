@@ -2,27 +2,48 @@ let totalQuestions = 0;
 let correctAnswers = 0;
 let currentAnswer = 0;
 let remainingAttempts = 0;
+let timerInterval;
+let timeRemaining = 0;
 
 function startQuiz() {
-    initializeQuiz();
-    toggleVisibility('setup', 'quiz');
-    generateQuestion();
+    try {
+        initializeQuiz();
+        toggleVisibility('setup', 'quiz');
+        generateQuestion();
+        if (document.getElementById('enableTimer').checked) {
+            startTimer();
+        }
+    } catch (error) {
+        console.error("Error starting quiz:", error);
+    }
 }
 
 function resetQuiz() {
-    resetStats();
-    toggleVisibility('quiz', 'setup');
-    clearUI();
+    try {
+        resetStats();
+        toggleVisibility('quiz', 'setup');
+        clearUI();
+        clearInterval(timerInterval);
+        timeRemaining = 0;
+        updateTimerUI();
+    } catch (error) {
+        console.error("Error resetting quiz:", error);
+    }
 }
 
 function generateQuestion() {
     const max = parseInt(document.getElementById('maxValue').value);
     const operation = document.getElementById('operation').value;
-    let num1, num2;
+    if (isNaN(max) || !operation) {
+        console.error("Invalid input for max value or operation.");
+        return;
+    }
 
-    resetAttempts();
+    let num1, num2;
+    resetAttempts(); // 初始化剩余机会
     updateAttemptsUI();
 
+    // 生成新的随机数
     ({ num1, num2, currentAnswer } = generateNumbers(max, operation));
 
     const question = `${num1} ${operation} ${num2}`;
@@ -32,11 +53,22 @@ function generateQuestion() {
 }
 
 function submitAnswer() {
+    if (document.getElementById('enableTimer').checked && timeRemaining <= 0) {
+        document.getElementById('error-message').innerText = '时间到！请等待下一题。';
+        return;
+    }
+
     const userAnswer = parseFloat(document.getElementById('answer').value);
+    if (isNaN(userAnswer)) {
+        document.getElementById('error-message').innerText = '请输入有效的数字';
+        return;
+    }
+
     const submitButton = document.querySelector('button[onclick="submitAnswer()"]');
     submitButton.disabled = true;
 
     if (userAnswer === currentAnswer) {
+        clearInterval(timerInterval);
         handleCorrectAnswer(submitButton);
     } else {
         handleIncorrectAnswer(submitButton);
@@ -54,12 +86,12 @@ function updateStats() {
     updateAttemptsUI();
 }
 
-function pseudoRandom(max) {
-    return Math.floor(Math.random() * max);
-}
-
 function initializeQuiz() {
     const maxAttempts = parseInt(document.getElementById('maxAttempts').value);
+    if (isNaN(maxAttempts) || maxAttempts < 1) {
+        console.error("Invalid max attempts value.");
+        return;
+    }
     remainingAttempts = maxAttempts;
     totalQuestions = 0;
     correctAnswers = 0;
@@ -124,14 +156,20 @@ function generateNumbers(max, operation) {
                 answer = num1 / num2;
             } while (num1 > max || num1 <= num2 || num1 % num2 !== 0);
             break;
+        default:
+            console.error("Unsupported operation.");
+            return { num1: 0, num2: 0, currentAnswer: 0 };
     }
     return { num1, num2, currentAnswer: answer };
+}
+
+function pseudoRandom(max) {
+    return Math.floor(Math.random() * max);
 }
 
 function handleCorrectAnswer(submitButton) {
     correctAnswers++;
     totalQuestions++;
-    remainingAttempts = 0;
     document.getElementById('answer').value = '';
     updateAttemptsUI();
     document.getElementById('error-message').innerText = '答对了！';
@@ -140,7 +178,14 @@ function handleCorrectAnswer(submitButton) {
     setTimeout(() => {
         document.getElementById('error-message').innerText = '';
         generateQuestion();
-        submitButton.disabled = false;
+        // 检查是否启用计时器
+        if (document.getElementById('enableTimer').checked) {
+            clearInterval(timerInterval); // 停止当前计时器
+            startTimer(); // 重新开始计时
+        }
+        document.getElementById('correct-answer').style.display = 'none';
+        updateStats();
+        submitButton.disabled = false; // 重新启用提交按钮
     }, 500);
 }
 
@@ -157,6 +202,10 @@ function handleIncorrectAnswer(submitButton) {
             document.getElementById('error-message').innerText = '';
             resetAttempts();
             generateQuestion();
+            if (document.getElementById('enableTimer').checked) {
+                clearInterval(timerInterval);
+                startTimer();
+            }
             document.getElementById('correct-answer').style.display = 'none';
             totalQuestions++;
             updateStats();
@@ -165,4 +214,55 @@ function handleIncorrectAnswer(submitButton) {
     } else {
         submitButton.disabled = false;
     }
+}
+
+function startTimer() {
+    timeRemaining = parseInt(document.getElementById('timerSeconds').value);
+    if (isNaN(timeRemaining) || timeRemaining < 1) {
+        console.error("Invalid timer seconds value.");
+        return;
+    }
+    updateTimerUI();
+    timerInterval = setInterval(() => {
+        timeRemaining--;
+        updateTimerUI();
+        if (timeRemaining <= 0) {
+            clearInterval(timerInterval);
+            handleTimeOut();
+        }
+    }, 1000);
+}
+
+function updateTimerUI() {
+    const timerElement = document.getElementById('timer');
+    if (timeRemaining > 0) {
+        timerElement.innerText = `剩余时间: ${timeRemaining} 秒`;
+    } else {
+        timerElement.innerText = '';
+    }
+}
+
+function handleTimeOut() {
+    const resetButton = document.querySelector('button[onclick="resetQuiz()"]');
+    resetButton.disabled = true;
+
+    document.getElementById('error-message').innerText = `时间到！正确答案是: ${currentAnswer}`;
+    document.getElementById('correct-answer').style.display = 'none';
+    setTimeout(() => {
+        document.getElementById('error-message').innerText = '';
+        generateQuestion();
+        if (document.getElementById('enableTimer').checked) {
+            clearInterval(timerInterval);
+            startTimer();
+        }
+        resetButton.disabled = false;
+        totalQuestions++;
+        updateStats();
+    }, 2000);
+}
+
+function toggleTimerInput() {
+    const timerSettings = document.getElementById('timerSettings');
+    const enableTimer = document.getElementById('enableTimer').checked;
+    timerSettings.style.display = enableTimer ? 'block' : 'none';
 } 
