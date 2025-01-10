@@ -363,7 +363,8 @@
         function handleTimeOut() {
             const resetButton = document.querySelector('button[onclick="resetQuiz()"]');
             resetButton.disabled = true;
-
+            // 清空输入框
+            document.getElementById('answer').value = '';
             document.getElementById('error-message').innerText = `时间到！正确答案是: ${currentAnswer}`;
             document.getElementById('correct-answer').style.display = 'none';
             setTimeout(() => {
